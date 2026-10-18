@@ -1,0 +1,15 @@
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-ws-H.PYIEHIE.WL9O.MEYCIQDm65fNdj35OtDRQxx5it44XQkvXOc8kukpBYmaFYyPOQIhAMApR_1R2olCrzo_PsIKJ2iWAK5Qf2xO1zHTFrhiPMXi",
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
+
+response = client.chat.completions.create(
+    model="qwen-plus",
+    messages=[
+        {"role": "user", "content": "你好，介绍一下你自己"}
+    ]
+)
+
+print(response.choices[0].message.content)
