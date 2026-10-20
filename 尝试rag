@@ -1,0 +1,74 @@
+from openai import OpenAI
+
+# 1. 配置你的 API（阿里云通义千问）
+client = OpenAI(
+    api_key="sk-ws-H.PYIEHIE.p8sS.MEUCIQCl6fPavBEZ7KV1AueOlpc0wt-BnAK2sRnR8bgGbkZq0AIgZxvRpPnSN5PvAdsfKZux0NjHbbdMpVFsnJsOenZbPGo",  # <--- 【重点检查这里！】
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
+
+# ----------------- 模块 1：读取文件 -----------------
+try:
+    with open("test.txt", 'r', encoding='utf-8') as file:
+        content = file.read()
+except FileNotFoundError:
+    print("❌ 找不到 test.txt，请确保你在第一步建好了文件！")
+    exit()
+
+# ----------------- 模块 2：文本切块（Chunking）-----------------
+chunk_size = 100  # 为了方便测试，我把块改小一点，100字一块
+overlap = 10
+step = chunk_size - overlap
+chunks = []
+
+start = 0
+while start < len(content):
+    end = start + chunk_size
+    chunk = content[start:end]
+    chunks.append(chunk)
+    start += step
+
+print(f"✅ 文件读取成功，共切分为 {len(chunks)} 个文本块。")
+
+# ----------------- 模块 3：交互与检索 -----------------
+print("\n🤖 知识库助手已上线！输入 '退出' 结束。")
+
+while True:
+    query = input("\n你: ")
+    if query == "退出":
+        print("🤖: 拜拜！")
+        break
+
+    # 简易检索：找包含你输入内容的文本块
+    matched_chunks = []
+    for c in chunks:
+        if query in c:
+            matched_chunks.append(c)
+
+    # ----------------- 模块 4：判断与组合 Prompt -----------------
+    if len(matched_chunks) > 0:
+        # 找到了相关内容，把列表拼成一段长文本
+        context_text = "\n".join(matched_chunks)
+
+        # 组装超级提示词
+        final_prompt = f"""
+        你是一个严谨的助手。请严格根据以下【参考资料】回答问题。
+        如果资料中没有，请回答“资料中未提及”。
+
+        【参考资料】：
+        {context_text}
+
+        【问题】：
+        {query}
+        """
+
+        # ----------------- 模块 5：呼叫大模型 -----------------
+        response = client.chat.completions.create(
+            model="qwen-plus",
+            messages=[{"role": "user", "content": final_prompt}]
+        )
+
+        print(f"🤖: {response.choices[0].message.content}")
+
+    else:
+        # 没找到关键字
+        print("🤖: 抱歉，你的本地资料库里没有找到相关的内容，请换个关键词试试。")
