@@ -2,7 +2,7 @@ from openai import OpenAI
 
 # 1. 配置你的 API（阿里云通义千问）
 client = OpenAI(
-    api_key="sk-ws-H.PYIEHIE.p8sS.MEUCIQCl6fPavBEZ7KV1AueOlpc0wt-BnAK2sRnR8bgGbkZq0AIgZxvRpPnSN5PvAdsfKZux0NjHbbdMpVFsnJsOenZbPGo",  # <--- 【重点检查这里！】
+     # <--- 【重点检查这里！】
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
 
